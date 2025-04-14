@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Personal Book Library</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen">
+  <div class="container mx-auto max-w-5xl p-6">
+    <header class="mb-8">
+      <h1 class="text-4xl font-bold text-gray-800 flex items-center gap-3">
+        <i class="fas fa-book-open text-indigo-600"></i> My Book Library
+      </h1>
+    </header>
+
+    <div class="bg-white rounded-2xl shadow-xl p-6 mb-8">
+      <div class="flex flex-col sm:flex-row gap-4">
+        <div class="relative flex-1">
+          <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="Search by title or author" 
+            class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+          />
+        </div>
+        <select 
+          id="categorySelect" 
+          class="px-4 py-3 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+        >
+          <option value="All">All Categories</option>
+          <option value="Dystopian">Dystopian</option>
+          <option value="Fantasy">Fantasy</option>
+          <option value="History">History</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="bookList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12"></div>
+
+    <div class="bg-white rounded-2xl shadow-xl p-6">
+      <h2 class="text-2xl font-semibold text-gray-800 flex items-center gap-3 mb-6">
+        <i class="fas fa-history text-indigo-600"></i> Borrowing History
+      </h2>
+      <ul id="historyList" class="list-disc pl-6 space-y-2"></ul>
+    </div>
+  </div>
+
+  <script>
+    const books = [
+      { id: 1, title: "1984", author: "George Orwell", category: "Dystopian" },
+      { id: 2, title: "The Hobbit", author: "J.R.R. Tolkien", category: "Fantasy" },
+      { id: 3, title: "Sapiens", author: "Yuval Noah Harari", category: "History" }
+    ];
+
+    let history = [];
+
+    const searchInput = document.getElementById('searchInput');
+    const categorySelect = document.getElementById('categorySelect');
+    const bookList = document.getElementById('bookList');
+    const historyList = document.getElementById('historyList');
+
+    function displayBooks() {
+      const search = searchInput.value.toLowerCase();
+      const category = categorySelect.value;
+      bookList.innerHTML = '';
+
+      const filtered = books.filter(book =>
+        (category === 'All' || book.category === category) &&
+        (book.title.toLowerCase().includes(search) || book.author.toLowerCase().includes(search))
+      );
+
+      filtered.forEach(book => {
+        const div = document.createElement('div');
+        div.className = 'bg-white rounded-xl shadow-md p-6 hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300';
+        div.innerHTML = `
+          <h3 class="text-xl font-semibold text-gray-800 mb-2">${book.title}</h3>
+          <p class="text-gray-600 mb-1"><span class="font-medium">Author:</span> ${book.author}</p>
+          <p class="text-indigo-600 text-sm mb-4"><span class="font-medium">Category:</span> ${book.category}</p>
+          <button 
+            onclick="borrowBook(${book.id})" 
+            class="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition-colors duration-200 flex items-center justify-center gap-2"
+          >
+            <i class="fas fa-book"></i> Borrow
+          </button>
+        `;
+        bookList.appendChild(div);
+      });
+    }
+
+    function borrowBook(bookId) {
+      const book = books.find(b => b.id === bookId);
+      const date = new Date().toLocaleDateString();
+      history.push({ ...book, date });
+      updateHistory();
+    }
+
+    function updateHistory() {
+      historyList.innerHTML = '';
+      history.forEach(entry => {
+        const li = document.createElement('li');
+        li.className = 'text-gray-600';
+        li.innerHTML = `<span class="font-medium">${entry.title}</span> by ${entry.author} — borrowed on <span class="text-indigo-600">${entry.date}</span>`;
+        historyList.appendChild(li);
+      });
+    }
+
+    searchInput.addEventListener('input', displayBooks);
+    categorySelect.addEventListener('change', displayBooks);
+
+    displayBooks();
+  </script>
+</body>
+</html>
